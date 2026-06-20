@@ -169,16 +169,66 @@
             <p class="footer-copyright">
                 © 2026 摄影师. All rights reserved.
             </p>
+            <p class="footer-visitor">
+                <span class="visitor-count">0</span> 次访问
+            </p>
         </div>
     </footer>
 
     <!-- JavaScript -->
     <script src="../assets/js/main.js"></script>
 
+    <!-- 访客计数器 -->
+    <script>
+        (function() {
+            const countEl = document.querySelector('.visitor-count');
+            if (countEl) {
+                fetch('https://api.countapi.xyz/hit/18870712239.xxz')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.value) {
+                            countEl.textContent = data.value.toLocaleString();
+                        }
+                    })
+                    .catch(err => {
+                        console.log('Visitor counter error:', err);
+                    });
+            }
+        })();
+    </script>
+
     <!-- Gitalk 评论系统 JS -->
     <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
 
     <!-- 评论系统初始化 -->
+    
+    <script>
+        if ('你的GitHub OAuth Client ID' !== '你的GitHub OAuth Client ID') {
+            const gitalk = new Gitalk({
+                clientID: '你的GitHub OAuth Client ID',
+                clientSecret: '你的GitHub OAuth Client Secret',
+                repo: 'xxz',
+                owner: '18870712239',
+                admin: ["18870712239"],
+                enableHotkey: true,
+                distractionFreeMode: false
+            });
+
+            
+            gitalk.id = location.pathname;
+            gitalk.title = document.title;
+            
+
+            gitalk.render('gitalk-container');
+        } else {
+            document.addEventListener('DOMContentLoaded', function() {
+                const container = document.getElementById('gitalk-container');
+                if (container) {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999; font-size: 14px;"><p>评论功能尚未配置，请联系管理员启用</p><p style="margin-top: 10px; font-size: 12px;">如需启用评论，请在 config.py 中配置 GitHub OAuth</p></div>';
+                }
+            });
+        }
+    </script>
     
 </body>
 </html>

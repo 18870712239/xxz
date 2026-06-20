@@ -748,6 +748,22 @@ body {
     font-weight: 300;
 }
 
+.footer-visitor {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 400;
+    margin-top: 10px;
+}
+
+.footer-visitor .visitor-count {
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 /* ========================================
    响应式设计 - 优化版
    ======================================== */
