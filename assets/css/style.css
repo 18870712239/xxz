@@ -998,3 +998,103 @@ body {
     background: var(--primary-color);
     color: var(--bg-color);
 }
+
+/* ========================================
+   评论系统样式
+   ======================================== */
+.comments-section {
+    background: var(--card-bg);
+    padding: 60px 0 120px;
+    margin-top: 40px;
+    border-top: 1px solid var(--border-color);
+}
+
+.comments-hint {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.gitalk-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Gitalk 样式调整 */
+.gt-container .gt-comment-content {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.gt-container .gt-comment-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.gt-container .gt-btn-text {
+    color: var(--primary-color);
+}
+
+.gt-container .gt-link {
+    color: var(--primary-color);
+}
+
+.gt-container .gt-header-textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 12px;
+}
+
+.gt-container .gt-header-preview {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 12px;
+}
+
+.gt-container .gt-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-weight: 600;
+    transition: all var(--transition-speed);
+}
+
+.gt-container .gt-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.gt-container .gt-btn-preview {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.gt-container .gt-btn-preview:hover {
+    background: rgba(255, 107, 107, 0.1);
+    transform: translateY(-2px);
+}
+
+.gt-container .gt-avatar img {
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+}
+
+.gt-container .gt-meta {
+    color: var(--text-secondary);
+}
+
+.gt-container .gt-header-comment {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+}
+
+.gt-container .gt-comment-admin .gt-comment-content {
+    border-left: 3px solid var(--primary-color);
+}

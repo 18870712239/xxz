@@ -22,6 +22,9 @@
     <!-- 样式表 -->
     <link rel="stylesheet" href="../assets/css/style.css">
 
+    <!-- Gitalk 评论系统 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
     <!-- Google Analytics -->
     
 
@@ -380,6 +383,17 @@
     </div>
 </div>
 
+<!-- 评论区域 -->
+
+<section class="comments-section">
+    <div class="container">
+        <h2 class="section-title">评论区</h2>
+        <p class="comments-hint">使用 GitHub 账号登录后即可发表评论</p>
+        <div id="gitalk-container" class="gitalk-container"></div>
+    </div>
+</section>
+
+
     </main>
 
     <!-- 页脚 -->
@@ -423,5 +437,11 @@
 
     <!-- JavaScript -->
     <script src="../assets/js/main.js"></script>
+
+    <!-- Gitalk 评论系统 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+    <!-- 评论系统初始化 -->
+    
 </body>
 </html>
