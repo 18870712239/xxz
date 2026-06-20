@@ -15,6 +15,7 @@
     let modalTitle = null;
     let modalDate = null;
     let modalExif = null;
+    let currentZoom = 1;
 
     // ========================================
     // DOM 加载完成后初始化
@@ -25,6 +26,7 @@
         initModal();
         initLazyLoading();
         initKeyboardNavigation();
+        initThemeToggle();
     });
 
     // ========================================
@@ -87,6 +89,156 @@
                 openModal(index);
             });
         });
+
+        // 初始化搜索功能
+        initSearch();
+
+        // 初始化点赞功能
+        initLikes();
+    }
+
+    // ========================================
+    // 点赞功能
+    // ========================================
+    function initLikes() {
+        const likeBtns = document.querySelectorAll('.photo-like-btn');
+
+        likeBtns.forEach(btn => {
+            const photoId = btn.getAttribute('data-photo-id');
+            const countEl = btn.querySelector('.like-count');
+
+            // 加载保存的点赞数据
+            const likes = getLikes();
+            const isLiked = likes.likedPhotos.includes(photoId);
+            const count = likes.counts[photoId] || 0;
+
+            if (isLiked) {
+                btn.classList.add('liked');
+            }
+            if (countEl) {
+                countEl.textContent = count;
+            }
+
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleLike(photoId, btn, countEl);
+            });
+        });
+    }
+
+    function getLikes() {
+        try {
+            const data = localStorage.getItem('photoLikes');
+            return data ? JSON.parse(data) : { likedPhotos: [], counts: {} };
+        } catch (e) {
+            return { likedPhotos: [], counts: {} };
+        }
+    }
+
+    function saveLikes(likes) {
+        try {
+            localStorage.setItem('photoLikes', JSON.stringify(likes));
+        } catch (e) {
+            console.log('Failed to save likes:', e);
+        }
+    }
+
+    function toggleLike(photoId, btn, countEl) {
+        const likes = getLikes();
+        const index = likes.likedPhotos.indexOf(photoId);
+
+        if (index > -1) {
+            // 取消点赞
+            likes.likedPhotos.splice(index, 1);
+            likes.counts[photoId] = Math.max(0, (likes.counts[photoId] || 0) - 1);
+            btn.classList.remove('liked');
+        } else {
+            // 添加点赞
+            likes.likedPhotos.push(photoId);
+            likes.counts[photoId] = (likes.counts[photoId] || 0) + 1;
+            btn.classList.add('liked');
+        }
+
+        saveLikes(likes);
+
+        if (countEl) {
+            countEl.textContent = likes.counts[photoId] || 0;
+        }
+    }
+
+    // ========================================
+    // 搜索功能
+    // ========================================
+    function initSearch() {
+        const searchInput = document.getElementById('search-input');
+        const searchStats = document.getElementById('search-stats');
+
+        if (!searchInput || !searchStats) return;
+
+        searchInput.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            filterPhotos(query);
+        });
+
+        // 点击搜索按钮
+        const searchBtn = document.querySelector('.search-btn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function() {
+                const query = searchInput.value.toLowerCase().trim();
+                filterPhotos(query);
+            });
+        }
+
+        // 回车键搜索
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const query = e.target.value.toLowerCase().trim();
+                filterPhotos(query);
+            }
+        });
+    }
+
+    function filterPhotos(query) {
+        const photoGrid = document.getElementById('photo-grid');
+        const searchStats = document.getElementById('search-stats');
+
+        if (!photoGrid || !searchStats) return;
+
+        const items = photoGrid.querySelectorAll('.masonry-item');
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const card = item.querySelector('.photo-card');
+            const img = item.querySelector('.photo-img');
+
+            if (!card || !img) return;
+
+            const title = (img.getAttribute('data-title') || '').toLowerCase();
+            const date = (img.getAttribute('data-date') || '').toLowerCase();
+            const album = (item.getAttribute('data-album') || '').toLowerCase();
+            const filename = (img.getAttribute('src') || '').split('/').pop().toLowerCase();
+
+            const match = query === '' ||
+                title.includes(query) ||
+                date.includes(query) ||
+                album.includes(query) ||
+                filename.includes(query);
+
+            if (match) {
+                item.style.display = 'block';
+                item.style.opacity = '1';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+                item.style.opacity = '0';
+            }
+        });
+
+        if (query === '') {
+            searchStats.textContent = `显示全部 ${visibleCount} 张照片`;
+        } else {
+            searchStats.textContent = `找到 ${visibleCount} 张匹配的照片`;
+        }
     }
 
     // ========================================
@@ -130,6 +282,59 @@
                 closeModal();
             }
         });
+
+        // 工具栏按钮
+        const zoomInBtn = document.getElementById('modal-zoom-in');
+        const zoomOutBtn = document.getElementById('modal-zoom-out');
+        const resetBtn = document.getElementById('modal-reset');
+        const downloadBtn = document.getElementById('modal-download');
+        const shareBtn = document.getElementById('modal-share');
+
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                zoomIn();
+            });
+        }
+
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                zoomOut();
+            });
+        }
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                resetZoom();
+            });
+        }
+
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                downloadPhoto();
+            });
+        }
+
+        if (shareBtn) {
+            shareBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sharePhoto();
+            });
+        }
+
+        // 鼠标滚轮缩放
+        modal.addEventListener('wheel', function(e) {
+            if (!modal.classList.contains('active')) return;
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomIn();
+            } else {
+                zoomOut();
+            }
+        }, { passive: false });
     }
 
     function openModal(index) {
@@ -146,6 +351,103 @@
 
         modal.classList.remove('active');
         document.body.style.overflow = '';
+        resetZoom();
+    }
+
+    // ========================================
+    // 缩放功能
+    // ========================================
+    function zoomIn() {
+        if (!modalImage) return;
+        currentZoom = Math.min(currentZoom + 0.25, 3);
+        applyZoom();
+    }
+
+    function zoomOut() {
+        if (!modalImage) return;
+        currentZoom = Math.max(currentZoom - 0.25, 0.25);
+        applyZoom();
+    }
+
+    function resetZoom() {
+        if (!modalImage) return;
+        currentZoom = 1;
+        applyZoom();
+    }
+
+    function applyZoom() {
+        if (!modalImage) return;
+        modalImage.style.transform = `scale(${currentZoom})`;
+
+        const zoomLevel = document.querySelector('.modal-zoom-level');
+        if (zoomLevel) {
+            zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
+        }
+    }
+
+    // ========================================
+    // 下载功能
+    // ========================================
+    function downloadPhoto() {
+        if (!modalImage || !modalImage.src) return;
+
+        const link = document.createElement('a');
+        link.href = modalImage.src;
+        const filename = modalImage.src.split('/').pop();
+        link.download = filename || 'photo.jpg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // ========================================
+    // 分享功能
+    // ========================================
+    function sharePhoto() {
+        if (!modalImage || !modalImage.src) return;
+
+        const shareData = {
+            title: document.title,
+            text: modalTitle ? modalTitle.textContent : '',
+            url: window.location.href
+        };
+
+        if (navigator.share) {
+            navigator.share(shareData)
+                .catch(err => {
+                    console.log('Share cancelled:', err);
+                });
+        } else {
+            copyLinkToClipboard();
+        }
+    }
+
+    function copyLinkToClipboard() {
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => {
+                showToast('链接已复制到剪贴板');
+            })
+            .catch(err => {
+                console.log('Copy failed:', err);
+                showToast('复制失败，请手动复制链接');
+            });
+    }
+
+    function showToast(message) {
+        let toast = document.getElementById('modal-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'modal-toast';
+            toast.className = 'modal-toast';
+            document.body.appendChild(toast);
+        }
+
+        toast.textContent = message;
+        toast.classList.add('active');
+
+        setTimeout(() => {
+            toast.classList.remove('active');
+        }, 2000);
     }
 
     function updateModalContent() {
@@ -365,5 +667,30 @@
             }
         });
     });
+
+    // ========================================
+    // 主题切换功能
+    // ========================================
+    function initThemeToggle() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        if (!themeToggle) return;
+
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme) {
+            body.classList.toggle('light-theme', savedTheme === 'light');
+        } else if (!prefersDark) {
+            body.classList.add('light-theme');
+            localStorage.setItem('theme', 'light');
+        }
+
+        themeToggle.addEventListener('click', function() {
+            const isLight = body.classList.toggle('light-theme');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
+    }
 
 })();
